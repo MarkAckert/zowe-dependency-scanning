@@ -1,6 +1,9 @@
 
 
 pipeline {
-    
+
+    stages {
+        stage('')
+    }
 
 }

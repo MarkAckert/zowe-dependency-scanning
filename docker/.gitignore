@@ -1,1 +1,2 @@
-include/*
+include/LicenseFinder/
+include/dependency-scan-rewrite/
