@@ -1,13 +1,16 @@
 # Jenkins Alpine comes with jenkins agent + java8, user jenkins (1000)
-FROM jenkins:alpine
+FROM jenkins/jnlp-slave:alpine
 
 USER root
 
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
 RUN apk update && apk upgrade
+RUN apk add curl
+RUN apk add bash=5.0.0-r0
 RUN apk add nodejs=10.16.0-r0
 RUN apk add npm=10.16.0-r0
+RUN apk add python zip
 
 ############# From Ruby Dockerfile - the apk packages are old
 
@@ -136,7 +139,6 @@ RUN apk add --update-cache postgresql-client nodejs \
 
 ########### End dependencies for Nokogiri
 
-
 RUN mkdir -p /home/jenkins
 RUN chown -R 1000:1000 /home/jenkins
 
@@ -151,7 +153,7 @@ RUN npm install -g yarn
 
 
 COPY --chown=jenkins:jenkins include/LicenseFinder /home/jenkins/LicenseFinder
-COPY --chown=jenkins:jenkins include/dependency-scan-rewrite /home/jenkins/dependency-scan-rewrite
+COPY --chown=jenkins:jenkins include/dependency-scan /home/jenkins/dependency-scan
 
 WORKDIR /home/jenkins/LicenseFinder
 RUN gem install bundler:2.0.1
@@ -159,8 +161,18 @@ RUN git init && git add .
 RUN bundle install -j4 
 RUN rake install
 
-WORKDIR /home/jenkins/dependency-scan-rewrite
+WORKDIR /home/jenkins/dependency-scan
 RUN yarn install && yarn build
-
-
 WORKDIR /home/jenkins
+
+USER root
+
+
+ARG VERSION=3.28
+COPY jenkins-agent-entrypoint /usr/local/bin/jenkins-agent-entrypoint
+RUN curl --create-dirs -fsSLo /usr/share/jenkins/slave.jar https://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/${VERSION}/remoting-${VERSION}.jar \
+  && chmod 755 /usr/share/jenkins \
+  && chmod 644 /usr/share/jenkins/slave.jar
+
+ENTRYPOINT [ "jenkins-agent-entrypoint" ]
+
