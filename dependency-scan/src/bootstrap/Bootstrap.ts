@@ -15,6 +15,7 @@ import * as fs from "fs";
 import * as https from "https";
 import { Container } from "inversify";
 import "reflect-metadata";
+import * as rimraf from "rimraf";
 import { CloneAction } from "../actions/CloneAction";
 import { InstallAction } from "../actions/InstallAction";
 import { ReportActon } from "../actions/ReportAction";
@@ -29,18 +30,31 @@ export function bootstrap(container: Container) {
     return new Promise<ScanApplication>((resolveApp, rejectApp) => {
         if (!container.isBound(TYPES.App)) {
             new Promise<boolean>((resolve, reject) => {
-                const reposFile = fs.createWriteStream(Constants.REPO_METADATA_PATH);
+
+                console.log("Making dir " + Constants.BUILD_RESOURCES_DIR);
+                rimraf.sync(Constants.BUILD_RESOURCES_DIR);
+                if (!fs.existsSync(Constants.BUILD_RESOURCES_DIR)) {
+                    fs.mkdirSync(Constants.BUILD_RESOURCES_DIR, { recursive: true });
+                }
+
+                const reposFile = fs.createWriteStream(Constants.ZOWE_MANIFEST_PATH);
                 const dependencyDecisionsFile = fs.createWriteStream(Constants.DEPENDENCY_DECISIONS_YAML);
-                reposFile.on("finish", () => {
-                    resolve(true);
-                });
-                const repoMetadataReq = https.get(fs.readFileSync(Constants.REPO_METADATA_SOURCE).toString().trim(), (response: any) => {
+                https.get(fs.readFileSync(Constants.ZOWE_MANIFEST_SOURCE).toString().trim(), (response: any) => {
                     response.pipe(reposFile);
-                });
-                const dependencyDecisionsReq = https.get(fs.readFileSync(Constants.DEPENDENCY_DECISIONS_SOURCE).toString().trim(),
-                    (response: any) => {
-                        response.pipe(dependencyDecisionsFile);
+                    reposFile.on("finish", () => {
+                        const manifest = JSON.parse(fs.readFileSync(Constants.ZOWE_MANIFEST_PATH).toString());
+                        const depDecisionLocation = (fs.readFileSync(Constants.ZOWE_MANIFEST_SOURCE).toString().trim())
+                            .replace("manifest.json.template", "")
+                            // Allow hard-coded access for the moment...externalize in Constants?
+                            // tslint:disable-next-line
+                            + manifest["dependencyDecisions"]["rel"];
+                        https.get(depDecisionLocation.trim(), (depResp: any) => {
+                            depResp.pipe(dependencyDecisionsFile);
+                            resolve(true);
+                        });
                     });
+                });
+
             }).then((result) => {
                 console.log("Getting application");
                 container.bind(TYPES.App).to(ScanApplication).inSingletonScope();
@@ -50,7 +64,7 @@ export function bootstrap(container: Container) {
                 container.bind(TYPES.ScannerAction).to(ScanAction).inSingletonScope();
                 container.bind(TYPES.ReportAction).to(ReportActon).inSingletonScope();
                 container.bind(TYPES.RepoRules).to(RepositoryRules).inSingletonScope();
-                container.bind(TYPES.RepoData).toConstantValue(JSON.parse(fs.readFileSync("./resources/repos_static_test.json").toString()));
+                container.bind(TYPES.ZoweManifest).toConstantValue(JSON.parse(fs.readFileSync(Constants.ZOWE_MANIFEST_PATH).toString()));
                 container.bind(TYPES.RepoRulesData).toConstantValue(JSON.parse(fs.readFileSync(Constants.REPO_RULE_PATH).toString()));
                 resolveApp(container.get(TYPES.App));
             }).catch((error) => {

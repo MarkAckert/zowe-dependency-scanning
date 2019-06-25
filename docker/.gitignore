@@ -1,2 +1,3 @@
 include/LicenseFinder/
 include/dependency-scan-rewrite/
+include/dependency-scan

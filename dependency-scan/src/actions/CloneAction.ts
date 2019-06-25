@@ -18,6 +18,7 @@ import * as rimraf from "rimraf";
 import { Constants } from "../constants/Constants";
 import { TYPES } from "../constants/Types";
 import { RepositoryInfo } from "../repos/RepositoryInfo";
+import { ZoweManifest } from "../repos/ZoweManifest";
 import { Logger } from "../utils/Logger";
 import { IAction } from "./IAction";
 
@@ -25,7 +26,7 @@ import { IAction } from "./IAction";
 export class CloneAction implements IAction {
 
     @inject(TYPES.Logger) private readonly log: Logger;
-    @inject(TYPES.RepoData) private readonly repoData: any;
+    @inject(TYPES.ZoweManifest) private readonly repoData: ZoweManifest;
     private cloneQueue: async.AsyncQueue<any> = async.queue(this.cloneRepository.bind(this), Constants.PARALLEL_CLONE_COUNT);
 
     constructor() {
@@ -43,9 +44,10 @@ export class CloneAction implements IAction {
      */
     public run(): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
-            Object.keys(this.repoData).forEach((repoName) => {
-                const repoTag = this.repoData[repoName];
-                this.cloneQueue.push({ name: repoName, tag: repoTag });
+            (this.repoData.sourceDependencies).forEach((componentEntry) => {
+                componentEntry.entries.forEach((repo: RepositoryInfo) => {
+                    this.cloneQueue.push(repo);
+                });
             });
             this.cloneQueue.drain = () => {
                 resolve(true);
@@ -54,9 +56,9 @@ export class CloneAction implements IAction {
     }
 
     private cloneRepository(repositoryData: RepositoryInfo, cb: (error: any, val?: any) => void) {
-        const cloneProcess = spawn("git", ["clone", "--branch", repositoryData.tag, `https://www.github.com/zowe/${repositoryData.name}`],
+        const cloneProcess = spawn("git", ["clone", "--branch", repositoryData.tag, `https://www.github.com/zowe/${repositoryData.repository}`],
             { cwd: Constants.CLONE_DIR, env: process.env });
-        const logPromise = this.log.logOutputAsync(cloneProcess, repositoryData.name, "clones");
+        const logPromise = this.log.logOutputAsync(cloneProcess, repositoryData.repository, "clones");
         logPromise.then((result) => {
             cb(null, result);
             if (result !== 0) {

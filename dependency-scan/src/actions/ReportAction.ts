@@ -18,6 +18,8 @@ import "reflect-metadata";
 import * as rimraf from "rimraf";
 import { Constants } from "../constants/Constants";
 import { TYPES } from "../constants/Types";
+import { ZoweManifest } from "../repos/ZoweManifest";
+import { ZoweManifestSourceDependency } from "../repos/ZoweManifestSourceDependency";
 import { Logger } from "../utils/Logger";
 import { Utilities } from "../utils/Utilities";
 import { IAction } from "./IAction";
@@ -28,11 +30,11 @@ export class ReportActon implements IAction {
 
     @inject(TYPES.Logger) private readonly log: Logger;
     @inject(TYPES.RepoRules) private readonly repoRules: any;
+    @inject(TYPES.ZoweManifest) private readonly zoweManifest: ZoweManifest;
 
     private readonly TABLE_HEADER =
         `| Component | Third-party Software | Version | License | GitHub |\n` +
         `| ----------| -------------------- | --------| ------- | ------ |`;
-    private readonly componentMap = JSON.parse(fs.readFileSync(Constants.COMPONENT_MAP_FILE).toString());
     private readonly REPORT_MARKDOWN_FILE = path.resolve(Constants.REPORTS_DIR, "markdown_dependency_report.md");
     private reportQueue: async.AsyncQueue<any> = async.queue(this.reportProject.bind(this), Constants.PARALLEL_REPORT_COUNT);
 
@@ -74,22 +76,24 @@ export class ReportActon implements IAction {
 
     private completeMarkdownReport(): Promise<any> {
         return new Promise((resolve, reject) => {
-            const sortedComponentMap: any = {};
-            Object.keys(this.componentMap).sort().forEach((key) => { sortedComponentMap[key] = this.componentMap[key]; });
+
+            const sourceDependencies: ZoweManifestSourceDependency[] = this.zoweManifest.sourceDependencies;
 
             const reportFile = fs.createWriteStream(this.REPORT_MARKDOWN_FILE, { flags: "a" });
             reportFile.write("# Zowe Third Party Library Usage\n\n");
 
-            Object.keys(sortedComponentMap).forEach((component) => {
-                reportFile.write("* [" + component + "](#" + component.replace(/\s/g, "-").toLowerCase()
+            (sourceDependencies).forEach((dependency) => {
+                reportFile.write("* [" + dependency.componentGroup + "](#" + dependency.componentGroup.replace(/\s/g, "-").toLowerCase()
                     + "-dependency-attributions)" + "\n");
             });
             reportFile.write("\n");
-            Object.keys(sortedComponentMap).forEach((component) => {
-                const reports = sortedComponentMap[component];
+            (sourceDependencies).forEach((dependency: ZoweManifestSourceDependency) => {
+                const reports = dependency.entries.map((depEntry) => depEntry.repository)
+                    .concat(this.repoRules.getExtraPathForRepositories(dependency.entries)
+                        .map((repoString: string) => { repoString.replace(/[\\\/]/g, "-"); }));
                 let totalDepCt = 0;
                 let missingReport: boolean = false;
-                let fullReportString = "### " + component + " Dependency Attributions " + "\n" + this.TABLE_HEADER + "\n";
+                let fullReportString = "### " + dependency.componentGroup + " Dependency Attributions " + "\n" + this.TABLE_HEADER + "\n";
                 reports.forEach((reportInstance: string) => {
                     try {
                         fs.statSync(path.join(Constants.REPORTS_DIR, `${reportInstance}.md`));
@@ -98,7 +102,8 @@ export class ReportActon implements IAction {
                         const reportDepCt = lines.length;
                         if (reportDepCt > 0) {
                             totalDepCt += reportDepCt;
-                            fullReportString = fullReportString + lines.join("\n").replace(new RegExp(reportInstance, "g"), component);
+                            fullReportString = fullReportString + lines.join("\n")
+                                .replace(new RegExp(reportInstance, "g"), dependency.componentGroup);
                         }
                     }
                     catch {
@@ -110,8 +115,8 @@ export class ReportActon implements IAction {
                     reportFile.write(fullReportString);
                     reportFile.write("\n\n");
                 }
-                else if (!missingReport && totalDepCt <= 0){
-                    console.log(component + " is empty");
+                else if (!missingReport && totalDepCt <= 0) {
+                    console.log(dependency.componentGroup + " is empty");
                 }
             });
             resolve(true);

@@ -15,7 +15,7 @@ export const TYPES = {
     DependencyDecision: Symbol("DependencyDecision"),
     Logger: Symbol("Logger"),
     InstallerAction: Symbol("InstallerAction"),
-    RepoData: Symbol("RepositoryMetadata"),
+    ZoweManifest: Symbol("ZoweManifest"),
     RepoRules: Symbol("RepositoryRules"),
     RepoRulesData: Symbol("RepositoryRulesData"),
     ReportAction: Symbol("ReportAction"),

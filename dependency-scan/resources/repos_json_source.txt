@@ -1,1 +1,0 @@
-https://raw.githubusercontent.com/MarkAckert/zowe-sources-draft/master/rules/source_tags.json

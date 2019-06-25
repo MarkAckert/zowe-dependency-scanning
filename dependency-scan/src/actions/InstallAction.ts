@@ -76,19 +76,20 @@ export class InstallAction implements IAction {
         }
         if (Utilities.dirHasNodeProject(absDir)) {
             console.log("Issuing yarn install in " + absDir);
-            fs.copyFileSync("private_npmrc/.npmrc", absDir + path.sep + ".npmrc");
-            fs.copyFileSync("private_npmrc/.yarnrc", absDir + path.sep + ".yarnrc");
-            if (fs.existsSync(absDir + path.sep + "package-lock.json")) {
-                fs.unlinkSync(absDir + path.sep + "package-lock.json");
+            fs.copyFileSync("private_npmrc/.npmrc", path.join(absDir, ".npmrc"));
+            fs.copyFileSync("private_npmrc/.yarnrc", path.join(absDir, ".yarnrc"));
+            if (fs.existsSync(path.join(absDir,"package-lock.json"))) {
+                fs.unlinkSync(path.join(absDir,"package-lock.json"));
             }
-            if (fs.existsSync(absDir + path.sep + "node_modules")) {
-                rimraf.sync(absDir + path.sep + "node_modules");
+            if (fs.existsSync(path.join(absDir,"node_modules"))) {
+                rimraf.sync(path.join(absDir,"node_modules"));
             }
-            // const dumpProcess = spawn("env", [ ]//"--production=true", "--network-timeout", "10000000",
-            //         /*"--network-concurrency", "15", "--verbose"]*/, { cwd: absDir, env: process.env, shell: false });
-            // processPromises.push(this.log.logOutputAsync(dumpProcess, projectDir+"dump", "install"));
-            const installProcess = spawn("yarn", ["install", "--production", "--network-timeout", "10000000",
-                "--network-concurrency", "15"], { cwd: absDir, env: undefined, shell: true });
+            // skip-integrity-check is required to bypass some errors on build environment...
+            // Integrity isn't *critically* important here as we just want to get dependency trees down and check their license info.
+            // So far, there are no failures downstream due to an integrity mismatch at this step.
+            /// -- Alternatives to skip-integrity-check are dropping network-concurrency to 1 and/or setting a mutex on yarn install.
+            const installProcess = spawn("yarn", ["install", "--production", "--network-timeout", "300000",
+                "--skip-integrity-check", "--network-concurrency", "5"], { cwd: absDir, env: process.env, shell: true });
             processPromises.push(this.log.logOutputAsync(installProcess, projectDir, "install"));
         }
         Promise.all(processPromises).then((result) => {

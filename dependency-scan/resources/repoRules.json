@@ -1,12 +1,9 @@
 {
 	"api-layer": {
-		"paths" : [
+		"paths": [
 			"api-catalog-ui/frontend"
 		],
-		"gradleArgs": [ "-x", "bundle" ],
-		"npm_peers" : [
-			"mineral-ui:0.12.0"
-		]
+		"gradleArgs": ["-x", "bundle"]
 	},
 	"db-browser": {
 		"paths": ["webClient"]
@@ -14,49 +11,14 @@
 	"db-browser-db2": {
 		"paths": ["nodeServer"]
 	},
-	"explorer-jes" : {
-		"npm_peers" : [
-			"explorer-ui-server@0.0.7"
-		]
-	},
-	"explorer-mvs" : {
-		"npm_peers" : [
-			"explorer-ui-server@0.0.7"
-		]
-	},
-	"explorer-uss" : {
-		"npm_peers" : [
-			"explorer-ui-server@0.0.7"
-		]
-	},
 	"file-transfer-app": {
 		"paths": ["webClient", "nodeServer"]
-	},
-	"imperative" : {
-		"npm_peers" : [
-			"fork-ts-checker-webpack-plugin@0.2.10",
-			"html-webpack-plugin@2.29.0",
-			"sw-precache-webpack-plugin@0.11.4",
-			"webpack-dev-server@2.9.4",
-			"webpack-dev-middleware@1.12.2",
-			"ajv-keywords@3.2.0",
-			"webpack-manifest-plugin@1.3.2",
-			"htmlparser2@3.3.0"
-		]
 	},
 	"sample-angular-app": {
 		"paths": ["nodeServer", "webClient"]
 	},
 	"sample-react-app": {
 		"paths": ["webClient"]
-	},
-	"sample-react-app\\webClient" : {
-		"npm_peers" : [
-			"ajv-keywords@3.3.0"
-		],
-		"npm_direct" : [
-			"webpack@^4.0.0"
-		]
 	},
 	"tn3270-ng2": {
 		"paths": ["webClient"]
@@ -71,33 +33,15 @@
 		"paths": ["webClient"]
 	},
 	"zlux-file-explorer": {
-		"paths": ["webClient"],
-		"npm_peers" : [
-			"@angular/core@4.4.7",
-			"@angular/platform-browser@4.4.7"
-		]
+		"paths": ["webClient"]
 	},
 	"zlux-file-properties": {
-		"paths": ["webClient"],
-		"npm_peers" : [
-			"@angular/core@4.4.7",
-			"@angular/platform-browser@4.4.7"
-		]
+		"paths": ["webClient"]
 	},
 	"zlux-shared": {
 		"paths": ["src/logging"]
 	},
 	"zos-subsystems": {
 		"paths": ["webClient"]
-	},
-	"zowe-cli-cics-plugin" : {
-		"npm_peers" : [
-			"@brightside/core@1.x"
-		]
-	},
-	"zowe-cli-db2-plugin" : {
-		"npm_peers" : [
-			"@brightside/core@1.x"
-		]
 	}
 }

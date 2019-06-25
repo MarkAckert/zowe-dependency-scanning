@@ -9,7 +9,7 @@
 *                                                                                 *
 */
 
-export type RepositoryInfo = {
-    repository: string,
-    tag: string
+
+export type ZoweManifestBinaryDependencies = {
+    //TODO
 };

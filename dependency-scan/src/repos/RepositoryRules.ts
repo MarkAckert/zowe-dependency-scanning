@@ -13,11 +13,12 @@ import { inject, injectable } from "inversify";
 import * as path from "path";
 import { isNullOrUndefined } from "util";
 import { TYPES } from "../constants/Types";
+import { RepositoryInfo } from "./RepositoryInfo";
 
 @injectable()
 export class RepositoryRules {
 
-    @inject(TYPES.RepoRulesData) private readonly repoRules: any; 
+    @inject(TYPES.RepoRulesData) private readonly repoRules: any;
     private readonly IGNORE_KEY: string = "ignores";
     private readonly GRADLE_KEY: string = "gradleArgs";
     private readonly PATHS_KEY: string = "paths";
@@ -38,6 +39,34 @@ export class RepositoryRules {
                     extraPaths.push(path.join(project, subpath));
                 });
             }
+        });
+        return extraPaths;
+    }
+
+    /**
+    * 
+    * @param project 
+    */
+    public getExtraPathForRepository(repoInfo: RepositoryInfo): string[] {
+        const extraPaths: string[] = [];
+        const repoRule = this.repoRules[repoInfo.repository];
+        if (!isNullOrUndefined(repoRule) && !isNullOrUndefined(repoRule[this.PATHS_KEY])) {
+            const subPaths: string[] = repoRule[this.PATHS_KEY];
+            subPaths.forEach((subpath: string) => {
+                extraPaths.push(path.join(repoInfo.repository, subpath));
+            });
+        }
+        return extraPaths;
+    }
+
+    /**
+     * 
+     * @param project 
+     */
+    public getExtraPathForRepositories(repoInfo: RepositoryInfo[]): string[] {
+        let extraPaths: string[] = [];
+        repoInfo.forEach((repo) => {
+            extraPaths = extraPaths.concat(this.getExtraPathForRepository(repo));
         });
         return extraPaths;
     }

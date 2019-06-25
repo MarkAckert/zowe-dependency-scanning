@@ -9,7 +9,11 @@
 *                                                                                 *
 */
 
-export type RepositoryInfo = {
-    repository: string,
-    tag: string
+import { RepositoryInfo } from "./RepositoryInfo";
+
+export type ZoweManifestSourceDependency = {
+    componentGroup: string,
+    entries: [
+        RepositoryInfo
+    ]
 };

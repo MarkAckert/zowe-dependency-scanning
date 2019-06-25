@@ -16,23 +16,21 @@ export class Constants {
 
     public static readonly BASE_WORK_DIR: string = path.join(".", "build");
 
+    public static readonly BUILD_RESOURCES_DIR: string = path.join(Constants.BASE_WORK_DIR, "resources");
+
     public static readonly CLONE_DIR: string = path.join(Constants.BASE_WORK_DIR, "clone_repositories");
 
     public static readonly LOG_DIR: string = path.join(Constants.BASE_WORK_DIR, "logs");
 
     public static readonly REPORTS_DIR: string = path.join(Constants.BASE_WORK_DIR, "reports");
 
-    public static readonly REPO_METADATA_PATH: string = path.join(".","resources","repos.json");
+    public static readonly ZOWE_MANIFEST_PATH: string = path.join(Constants.BUILD_RESOURCES_DIR, "zowe-manifest.json");
 
-    public static readonly REPO_METADATA_SOURCE: string = path.join(".","resources","repos_json_source.txt");
+    public static readonly ZOWE_MANIFEST_SOURCE: string = path.join(".", "resources", "zowe-manifest-source.txt");
 
-    public static readonly REPO_RULE_PATH: string = path.join(".","resources","repoRules.json");
+    public static readonly REPO_RULE_PATH: string = path.join(".", "resources", "repoRules.json");
 
-    public static readonly DEPENDENCY_DECISIONS_YAML: string = path.join(".","resources","dependency_decisions.yml");
-
-    public static readonly DEPENDENCY_DECISIONS_SOURCE: string = path.join(".","resources","dependency_yml_source.txt");
-
-    public static readonly COMPONENT_MAP_FILE: string = path.join(".","resources","report","componentMap.json");
+    public static readonly DEPENDENCY_DECISIONS_YAML: string = path.join(Constants.BUILD_RESOURCES_DIR, "dependency_decisions.yml");
 
     public static readonly SCAN_AGGREGATE_REPORT_FILE: string = path.join(Constants.REPORTS_DIR, "dependency_approval_action_aggregates.json");
 

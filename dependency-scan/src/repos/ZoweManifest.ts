@@ -9,7 +9,30 @@
 *                                                                                 *
 */
 
-export type RepositoryInfo = {
-    repository: string,
-    tag: string
-};
+import { ZoweManifestBinaryDependencies } from "./ZoweManifestBinaryDependencies";
+import { ZoweManifestSourceDependency } from "./ZoweManifestSourceDependency";
+
+export type ZoweManifest = {
+    __meta__: {
+        name: string,
+        version: string,
+        description: string,
+        license: string,
+        homepage: string,
+        build: {
+            branch: string,
+            number: string,
+            commitHash: string,
+            timestamp: string
+        }
+    },
+    binaryDependencies: [
+        ZoweManifestBinaryDependencies
+    ],
+    sourceDependencies: [
+        ZoweManifestSourceDependency
+    ],
+    dependencyDecisions: {
+        rel: string
+    }
+}
