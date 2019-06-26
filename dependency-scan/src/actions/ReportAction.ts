@@ -88,9 +88,9 @@ export class ReportActon implements IAction {
             });
             reportFile.write("\n");
             (sourceDependencies).forEach((dependency: ZoweManifestSourceDependency) => {
-                const reports = dependency.entries.map((depEntry) => depEntry.repository)
-                    .concat(this.repoRules.getExtraPathForRepositories(dependency.entries)
-                        .map((repoString: string) => { repoString.replace(/[\\\/]/g, "-"); }));
+                const reports = (dependency.entries.map((depEntry) => depEntry.repository))
+                    .concat((this.repoRules.getExtraPathForRepositories(dependency.entries)
+                        .map((repoString: string) => repoString.replace(/[\\\/]/g, "-"))));
                 let totalDepCt = 0;
                 let missingReport: boolean = false;
                 let fullReportString = "### " + dependency.componentGroup + " Dependency Attributions " + "\n" + this.TABLE_HEADER + "\n";
