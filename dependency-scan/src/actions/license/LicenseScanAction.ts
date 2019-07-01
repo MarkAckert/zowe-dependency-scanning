@@ -15,14 +15,14 @@ import * as fs from "fs";
 import { inject, injectable } from "inversify";
 import * as path from "path";
 import "reflect-metadata";
-import { Constants } from "../constants/Constants";
-import { TYPES } from "../constants/Types";
-import { Logger } from "../utils/Logger";
-import { Utilities } from "../utils/Utilities";
-import { IAction } from "./IAction";
+import { Constants } from "../../constants/Constants";
+import { TYPES } from "../../constants/Types";
+import { Logger } from "../../utils/Logger";
+import { Utilities } from "../../utils/Utilities";
+import { IAction } from "../IAction";
 
 @injectable()
-export class ScanAction implements IAction {
+export class LicenseScanAction implements IAction {
 
     @inject(TYPES.Logger) private readonly log: Logger;
     @inject(TYPES.RepoRules) private readonly repoRules: any;

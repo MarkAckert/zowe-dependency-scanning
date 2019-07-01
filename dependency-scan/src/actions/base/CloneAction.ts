@@ -15,12 +15,12 @@ import * as fs from "fs";
 import { inject, injectable } from "inversify";
 import "reflect-metadata";
 import * as rimraf from "rimraf";
-import { Constants } from "../constants/Constants";
-import { TYPES } from "../constants/Types";
-import { RepositoryInfo } from "../repos/RepositoryInfo";
-import { ZoweManifest } from "../repos/ZoweManifest";
-import { Logger } from "../utils/Logger";
-import { IAction } from "./IAction";
+import { Constants } from "../../constants/Constants";
+import { TYPES } from "../../constants/Types";
+import { RepositoryInfo } from "../../repos/RepositoryInfo";
+import { ZoweManifest } from "../../repos/ZoweManifest";
+import { Logger } from "../../utils/Logger";
+import { IAction } from "../IAction";
 
 @injectable()
 export class CloneAction implements IAction {

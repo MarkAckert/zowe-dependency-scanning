@@ -1,3 +1,6 @@
+import { ZoweManifestBinaryDependency } from "./ZoweManifestBinaryDependency";
+import { ZoweManifestSourceDependency } from "./ZoweManifestSourceDependency";
+
 /*
 * This program and the accompanying materials are made available under the terms of the *
 * Eclipse Public License v2.0 which accompanies this distribution, and is available at *
@@ -9,8 +12,6 @@
 *                                                                                 *
 */
 
-import { ZoweManifestBinaryDependencies } from "./ZoweManifestBinaryDependencies";
-import { ZoweManifestSourceDependency } from "./ZoweManifestSourceDependency";
 
 export type ZoweManifest = {
     __meta__: {
@@ -26,13 +27,13 @@ export type ZoweManifest = {
             timestamp: string
         }
     },
-    binaryDependencies: [
-        ZoweManifestBinaryDependencies
-    ],
+    binaryDependencies: {
+        entries: ZoweManifestBinaryDependency
+    },
     sourceDependencies: [
         ZoweManifestSourceDependency
     ],
     dependencyDecisions: {
         rel: string
     }
-}
+};

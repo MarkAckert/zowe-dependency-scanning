@@ -17,12 +17,12 @@ import * as os from "os";
 import * as path from "path";
 import "reflect-metadata";
 import * as rimraf from "rimraf";
-import { Constants } from "../constants/Constants";
-import { TYPES } from "../constants/Types";
-import { RepositoryRules } from "../repos/RepositoryRules";
-import { Logger } from "../utils/Logger";
-import { Utilities } from "../utils/Utilities";
-import { IAction } from "./IAction";
+import { Constants } from "../../constants/Constants";
+import { TYPES } from "../../constants/Types";
+import { RepositoryRules } from "../../repos/RepositoryRules";
+import { Logger } from "../../utils/Logger";
+import { Utilities } from "../../utils/Utilities";
+import { IAction } from "../IAction";
 
 @injectable()
 export class InstallAction implements IAction {
@@ -46,7 +46,7 @@ export class InstallAction implements IAction {
             this.installQueue.push(rulesDirs);
             this.installQueue.drain = () => {
                 resolve(true);
-            }
+            };
         });
     }
 
@@ -76,13 +76,13 @@ export class InstallAction implements IAction {
         }
         if (Utilities.dirHasNodeProject(absDir)) {
             console.log("Issuing yarn install in " + absDir);
-            fs.copyFileSync("private_npmrc/.npmrc", path.join(absDir, ".npmrc"));
-            fs.copyFileSync("private_npmrc/.yarnrc", path.join(absDir, ".yarnrc"));
-            if (fs.existsSync(path.join(absDir,"package-lock.json"))) {
-                fs.unlinkSync(path.join(absDir,"package-lock.json"));
+            fs.copyFileSync("resources/private_npmrc/.npmrc", path.join(absDir, ".npmrc"));
+            fs.copyFileSync("resources/private_npmrc/.yarnrc", path.join(absDir, ".yarnrc"));
+            if (fs.existsSync(path.join(absDir, "package-lock.json"))) {
+                fs.unlinkSync(path.join(absDir, "package-lock.json"));
             }
-            if (fs.existsSync(path.join(absDir,"node_modules"))) {
-                rimraf.sync(path.join(absDir,"node_modules"));
+            if (fs.existsSync(path.join(absDir, "node_modules"))) {
+                rimraf.sync(path.join(absDir, "node_modules"));
             }
             // skip-integrity-check is required to bypass some errors on build environment...
             // Integrity isn't *critically* important here as we just want to get dependency trees down and check their license info.

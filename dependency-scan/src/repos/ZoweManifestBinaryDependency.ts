@@ -10,6 +10,11 @@
 */
 
 
-export type ZoweManifestBinaryDependencies = {
-    //TODO
+export type ZoweManifestBinaryDependency = {
+    [identifier: string]: {
+        version: string,
+        artifact?: string,
+        explode?: string,
+        target?: string
+    }
 };

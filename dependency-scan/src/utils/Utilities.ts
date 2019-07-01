@@ -15,6 +15,23 @@ import { isNullOrUndefined } from "util";
 
 export class Utilities {
 
+    public static getEnvStr(envVar: string, defaultValue: string = ""): string {
+        if (!isNullOrUndefined(process.argv) && process.argv.includes(envVar)) {
+            const argIndex = process.argv.indexOf(envVar);
+            if (!isNullOrUndefined(process.argv[argIndex + 1])) {
+                console.log(`Using command line ${envVar}=${process.argv[argIndex + 1]}`);
+                return process.argv[argIndex + 1];
+            }
+            console.log(`Found command line ${envVar} but no value was supplied as the next arg. Ignoring.`);
+            return defaultValue;
+        }
+        else if (!isNullOrUndefined(process.env[envVar])) {
+            console.log(`Using env ${envVar}=${process.env[envVar]}`);
+            return process.env[envVar];
+        }
+        return defaultValue;
+    }
+
     public static getEnv(envVar: string, defaultValue: boolean = false): boolean {
         //TODO: use yargs for better parsing?
         if (!isNullOrUndefined(process.argv) && process.argv.includes(envVar)) {
@@ -33,6 +50,20 @@ export class Utilities {
             return false;
         }
         return defaultValue;
+    }
+
+    public static getExclusiveEnv(envVar: string, exclusiveWith: string, defaultValue: boolean = false): boolean {
+        if (this.getEnv(envVar)) {
+            process.env[exclusiveWith] = "false";
+            return true;
+        }
+        else if (this.getEnv(exclusiveWith)) {
+            return false;
+        }
+        else {
+            process.env[exclusiveWith] = `${!defaultValue}`;
+            return defaultValue;
+        }
     }
 
     public static isDirectory(dir: string) {

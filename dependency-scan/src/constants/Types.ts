@@ -10,14 +10,21 @@
 */
 
 export const TYPES = {
+    // Application Wide
     App: Symbol("ScanApplication"),
-    CloneAction: Symbol("CloneAction"),
-    DependencyDecision: Symbol("DependencyDecision"),
     Logger: Symbol("Logger"),
-    InstallerAction: Symbol("InstallerAction"),
+
+    // Manifest, Metadata, and related help
     ZoweManifest: Symbol("ZoweManifest"),
+    DependencyDecision: Symbol("DependencyDecision"),
     RepoRules: Symbol("RepositoryRules"),
     RepoRulesData: Symbol("RepositoryRulesData"),
-    ReportAction: Symbol("ReportAction"),
-    ScannerAction: Symbol("ScannerAction")
+
+    // Actions
+    CloneAction: Symbol("CloneAction"),
+    InstallAction: Symbol("InstallAction"),
+    LicenseScanAction: Symbol("LicenseScanAction"),
+    LicenseReportAction: Symbol("LicenseReportAction"),
+    OwaspScanReportAction: Symbol("OwaspScanAction"),
+    OwaspPublishAction: Symbol("OwaspPublishAction")
 };

@@ -1,7 +1,9 @@
 {
 	"api-layer": {
 		"paths": [
-			"api-catalog-ui/frontend"
+			"api-catalog-ui/frontend",
+			"helloworld-expressjs",
+			"apiml-auth"
 		],
 		"gradleArgs": ["-x", "bundle"]
 	},

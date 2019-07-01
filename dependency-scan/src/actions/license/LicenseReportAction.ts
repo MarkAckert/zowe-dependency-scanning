@@ -16,17 +16,17 @@ import { inject, injectable } from "inversify";
 import * as path from "path";
 import "reflect-metadata";
 import * as rimraf from "rimraf";
-import { Constants } from "../constants/Constants";
-import { TYPES } from "../constants/Types";
-import { ZoweManifest } from "../repos/ZoweManifest";
-import { ZoweManifestSourceDependency } from "../repos/ZoweManifestSourceDependency";
-import { Logger } from "../utils/Logger";
-import { Utilities } from "../utils/Utilities";
-import { IAction } from "./IAction";
+import { Constants } from "../../constants/Constants";
+import { TYPES } from "../../constants/Types";
+import { ZoweManifest } from "../../repos/ZoweManifest";
+import { ZoweManifestSourceDependency } from "../../repos/ZoweManifestSourceDependency";
+import { Logger } from "../../utils/Logger";
+import { Utilities } from "../../utils/Utilities";
+import { IAction } from "../IAction";
 
 
 @injectable()
-export class ReportActon implements IAction {
+export class LicenseReportAction implements IAction {
 
     @inject(TYPES.Logger) private readonly log: Logger;
     @inject(TYPES.RepoRules) private readonly repoRules: any;
@@ -35,16 +35,16 @@ export class ReportActon implements IAction {
     private readonly TABLE_HEADER =
         `| Component | Third-party Software | Version | License | GitHub |\n` +
         `| ----------| -------------------- | --------| ------- | ------ |`;
-    private readonly REPORT_MARKDOWN_FILE = path.resolve(Constants.REPORTS_DIR, "markdown_dependency_report.md");
+    private readonly REPORT_MARKDOWN_FILE = path.resolve(Constants.LICENSE_REPORTS_DIR, "markdown_dependency_report.md");
     private reportQueue: async.AsyncQueue<any> = async.queue(this.reportProject.bind(this), Constants.PARALLEL_REPORT_COUNT);
 
     constructor() {
-        console.log("Making dir " + Constants.REPORTS_DIR);
+        console.log("Making dir " + Constants.LICENSE_REPORTS_DIR);
         if (Constants.CLEAN_REPO_DIR_ON_START && (Constants.EXEC_REPORTS || Constants.EXEC_SCANS)) {
-            rimraf.sync(Constants.REPORTS_DIR);
+            rimraf.sync(Constants.LICENSE_REPORTS_DIR);
         }
-        if (!fs.existsSync(Constants.REPORTS_DIR)) {
-            fs.mkdirSync(Constants.REPORTS_DIR, { recursive: true });
+        if (!fs.existsSync(Constants.LICENSE_REPORTS_DIR)) {
+            fs.mkdirSync(Constants.LICENSE_REPORTS_DIR, { recursive: true });
         }
         this.completeMarkdownReport.bind(this);
     }
@@ -96,8 +96,8 @@ export class ReportActon implements IAction {
                 let fullReportString = "### " + dependency.componentGroup + " Dependency Attributions " + "\n" + this.TABLE_HEADER + "\n";
                 reports.forEach((reportInstance: string) => {
                     try {
-                        fs.statSync(path.join(Constants.REPORTS_DIR, `${reportInstance}.md`));
-                        const lines: string[] = fs.readFileSync(path.join(Constants.REPORTS_DIR, `${reportInstance}.md`), "utf-8")
+                        fs.statSync(path.join(Constants.LICENSE_REPORTS_DIR, `${reportInstance}.md`));
+                        const lines: string[] = fs.readFileSync(path.join(Constants.LICENSE_REPORTS_DIR, `${reportInstance}.md`), "utf-8")
                             .split("\n").filter(Boolean);
                         const reportDepCt = lines.length;
                         if (reportDepCt > 0) {
@@ -131,7 +131,7 @@ export class ReportActon implements IAction {
         const reportProcess = spawn("license_finder", ["report", "--format", "markdown_table",
             "--project-path", resolvedDir,
             "--project-name", normalizedProjectName,
-            "--save", path.join(Constants.REPORTS_DIR, `${normalizedProjectName}.md`),
+            "--save", path.join(Constants.LICENSE_REPORTS_DIR, `${normalizedProjectName}.md`),
             "--decisions-file=" + Constants.DEPENDENCY_DECISIONS_YAML], {
                 cwd: process.env.cwd,
                 env: process.env,

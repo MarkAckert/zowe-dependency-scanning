@@ -16,10 +16,12 @@ import * as https from "https";
 import { Container } from "inversify";
 import "reflect-metadata";
 import * as rimraf from "rimraf";
-import { CloneAction } from "../actions/CloneAction";
-import { InstallAction } from "../actions/InstallAction";
-import { ReportActon } from "../actions/ReportAction";
-import { ScanAction } from "../actions/ScanAction";
+import { CloneAction } from "../actions/base/CloneAction";
+import { InstallAction } from "../actions/base/InstallAction";
+import { LicenseReportAction } from "../actions/license/LicenseReportAction";
+import { LicenseScanAction } from "../actions/license/LicenseScanAction";
+import { OwaspPublishAction } from "../actions/owasp/OwaspPublishAction";
+import { OwaspScanReportAction } from "../actions/owasp/OwaspScanReportAction";
 import { ScanApplication } from "../app/ScanApplication";
 import { Constants } from "../constants/Constants";
 import { TYPES } from "../constants/Types";
@@ -31,38 +33,47 @@ export function bootstrap(container: Container) {
         if (!container.isBound(TYPES.App)) {
             new Promise<boolean>((resolve, reject) => {
 
-                console.log("Making dir " + Constants.BUILD_RESOURCES_DIR);
-                rimraf.sync(Constants.BUILD_RESOURCES_DIR);
-                if (!fs.existsSync(Constants.BUILD_RESOURCES_DIR)) {
-                    fs.mkdirSync(Constants.BUILD_RESOURCES_DIR, { recursive: true });
-                }
 
-                const reposFile = fs.createWriteStream(Constants.ZOWE_MANIFEST_PATH);
-                const dependencyDecisionsFile = fs.createWriteStream(Constants.DEPENDENCY_DECISIONS_YAML);
-                https.get(fs.readFileSync(Constants.ZOWE_MANIFEST_SOURCE).toString().trim(), (response: any) => {
-                    response.pipe(reposFile);
-                    reposFile.on("finish", () => {
-                        const manifest = JSON.parse(fs.readFileSync(Constants.ZOWE_MANIFEST_PATH).toString());
-                        const depDecisionLocation = (fs.readFileSync(Constants.ZOWE_MANIFEST_SOURCE).toString().trim())
-                            .replace("manifest.json.template", "")
-                            // Allow hard-coded access for the moment...externalize in Constants?
-                            // tslint:disable-next-line
-                            + manifest["dependencyDecisions"]["rel"];
-                        https.get(depDecisionLocation.trim(), (depResp: any) => {
-                            depResp.pipe(dependencyDecisionsFile);
-                            resolve(true);
+                if (Constants.DOWNLOAD_MANIFEST) {
+                    console.log("Making dir " + Constants.BUILD_RESOURCES_DIR);
+                    rimraf.sync(Constants.BUILD_RESOURCES_DIR);
+                    if (!fs.existsSync(Constants.BUILD_RESOURCES_DIR)) {
+                        fs.mkdirSync(Constants.BUILD_RESOURCES_DIR, { recursive: true });
+                    }
+
+                    const reposFile = fs.createWriteStream(Constants.ZOWE_MANIFEST_PATH);
+                    const dependencyDecisionsFile = fs.createWriteStream(Constants.DEPENDENCY_DECISIONS_YAML);
+                    https.get(fs.readFileSync(Constants.ZOWE_MANIFEST_SOURCE).toString().trim(), (response: any) => {
+                        response.pipe(reposFile);
+                        reposFile.on("finish", () => {
+                            const manifest = JSON.parse(fs.readFileSync(Constants.ZOWE_MANIFEST_PATH).toString());
+                            const depDecisionLocation = (fs.readFileSync(Constants.ZOWE_MANIFEST_SOURCE).toString().trim())
+                                .replace("manifest.json.template", "")
+                                // Allow hard-coded access for the moment...externalize in Constants?
+                                // tslint:disable-next-line
+                                + manifest["dependencyDecisions"]["rel"];
+                            https.get(depDecisionLocation.trim(), (depResp: any) => {
+                                depResp.pipe(dependencyDecisionsFile);
+                                resolve(true);
+                            });
                         });
                     });
-                });
+                }
+                else {
+                    // if we are not grabbing manifest + depDecisions, go ahead and proceed....
+                    resolve(true);
+                }
 
             }).then((result) => {
                 console.log("Getting application");
                 container.bind(TYPES.App).to(ScanApplication).inSingletonScope();
                 container.bind(TYPES.Logger).to(Logger).inSingletonScope();
                 container.bind(TYPES.CloneAction).to(CloneAction).inSingletonScope();
-                container.bind(TYPES.InstallerAction).to(InstallAction).inSingletonScope();
-                container.bind(TYPES.ScannerAction).to(ScanAction).inSingletonScope();
-                container.bind(TYPES.ReportAction).to(ReportActon).inSingletonScope();
+                container.bind(TYPES.InstallAction).to(InstallAction).inSingletonScope();
+                container.bind(TYPES.LicenseScanAction).to(LicenseScanAction).inSingletonScope();
+                container.bind(TYPES.LicenseReportAction).to(LicenseReportAction).inSingletonScope();
+                container.bind(TYPES.OwaspScanReportAction).to(OwaspScanReportAction).inSingletonScope();
+                container.bind(TYPES.OwaspPublishAction).to(OwaspPublishAction).inSingletonScope();
                 container.bind(TYPES.RepoRules).to(RepositoryRules).inSingletonScope();
                 container.bind(TYPES.ZoweManifest).toConstantValue(JSON.parse(fs.readFileSync(Constants.ZOWE_MANIFEST_PATH).toString()));
                 container.bind(TYPES.RepoRulesData).toConstantValue(JSON.parse(fs.readFileSync(Constants.REPO_RULE_PATH).toString()));

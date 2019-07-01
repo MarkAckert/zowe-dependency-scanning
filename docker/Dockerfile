@@ -10,7 +10,7 @@ RUN apk add curl
 RUN apk add bash=5.0.0-r0
 RUN apk add nodejs=10.16.0-r0
 RUN apk add npm=10.16.0-r0
-RUN apk add python zip
+RUN apk add python zip unzip wget
 
 ############# From Ruby Dockerfile - the apk packages are old
 
@@ -18,8 +18,8 @@ RUN apk add python zip
 # skip installing gem documentation
 RUN mkdir -p /usr/local/etc \
 	&& { \
-		echo 'install: --no-document'; \
-		echo 'update: --no-document'; \
+	echo 'install: --no-document'; \
+	echo 'update: --no-document'; \
 	} >> /usr/local/etc/gemrc
 
 ENV RUBY_MAJOR 2.6
@@ -32,32 +32,32 @@ ENV RUBY_DOWNLOAD_SHA256 11a83f85c03d3f0fc9b8a9b6cad1b2674f26c5aaa43ba858d4b0fcc
 RUN set -ex \
 	\
 	&& apk add --no-cache --virtual .ruby-builddeps \
-		autoconf \
-		bison \
-		bzip2 \
-		bzip2-dev \
-		ca-certificates \
-		coreutils \
-		dpkg-dev dpkg \
-		gcc \
-		gdbm-dev \
-		glib-dev \
-		libc-dev \
-		libffi-dev \
-		libxml2-dev \
-		libxslt-dev \
-		linux-headers \
-		make \
-		ncurses-dev \
-		libressl \
-		libressl-dev \
-		procps \
-		readline-dev \
-		ruby \
-		tar \
-		xz \
-		yaml-dev \
-		zlib-dev \
+	autoconf \
+	bison \
+	bzip2 \
+	bzip2-dev \
+	ca-certificates \
+	coreutils \
+	dpkg-dev dpkg \
+	gcc \
+	gdbm-dev \
+	glib-dev \
+	libc-dev \
+	libffi-dev \
+	libxml2-dev \
+	libxslt-dev \
+	linux-headers \
+	make \
+	ncurses-dev \
+	libressl \
+	libressl-dev \
+	procps \
+	readline-dev \
+	ruby \
+	tar \
+	xz \
+	yaml-dev \
+	zlib-dev \
 	\
 	&& wget --no-check-certificate -O ruby.tar.xz "https://cache.ruby-lang.org/pub/ruby/${RUBY_MAJOR%-rc}/ruby-$RUBY_VERSION.tar.xz" \
 	&& echo "$RUBY_DOWNLOAD_SHA256 *ruby.tar.xz" | sha256sum -c - \
@@ -76,45 +76,45 @@ RUN cd /usr/src/ruby \
 	&& patch -p1 -i thread-stack-fix.patch \
 	&& rm thread-stack-fix.patch \
 	\
-# hack in "ENABLE_PATH_CHECK" disabling to suppress:
-#   warning: Insecure world writable dir
+	# hack in "ENABLE_PATH_CHECK" disabling to suppress:
+	#   warning: Insecure world writable dir
 	&& { \
-		echo '#define ENABLE_PATH_CHECK 0'; \
-		echo; \
-		cat file.c; \
+	echo '#define ENABLE_PATH_CHECK 0'; \
+	echo; \
+	cat file.c; \
 	} > file.c.new \
 	&& mv file.c.new file.c \
 	\
 	&& autoconf \
 	&& gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
-# the configure script does not detect isnan/isinf as macros
+	# the configure script does not detect isnan/isinf as macros
 	&& export ac_cv_func_isnan=yes ac_cv_func_isinf=yes \
 	&& ./configure \
-		--build="$gnuArch" \
-		--disable-install-doc \
-		--enable-shared \
+	--build="$gnuArch" \
+	--disable-install-doc \
+	--enable-shared \
 	&& make -j "$(nproc)" \
 	&& make install \
 	\
 	&& runDeps="$( \
-		scanelf --needed --nobanner --format '%n#p' --recursive /usr/local \
-			| tr ',' '\n' \
-			| sort -u \
-			| awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
+	scanelf --needed --nobanner --format '%n#p' --recursive /usr/local \
+	| tr ',' '\n' \
+	| sort -u \
+	| awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
 	)" \
 	&& apk add --no-network --virtual .ruby-rundeps $runDeps \
-		bzip2 \
-		ca-certificates \
-		libffi-dev \
-		procps \
-		yaml-dev \
-		zlib-dev \
+	bzip2 \
+	ca-certificates \
+	libffi-dev \
+	procps \
+	yaml-dev \
+	zlib-dev \
 	&& apk del --no-network .ruby-builddeps \
 	&& cd / \
 	&& rm -r /usr/src/ruby \
-# rough smoke test
+	# rough smoke test
 	&& ruby --version && gem --version && bundle --version 
-	
+
 RUN which bundle
 # install things globally, for great justice
 # and don't create ".bundle" in all our apps
@@ -133,14 +133,14 @@ RUN mkdir -p "$GEM_HOME" && chmod 777 "$GEM_HOME"
 ########## Alpine - Ruby Dependency  Nokogiri Requirements
 
 RUN apk add --update-cache postgresql-client nodejs \
-    libffi-dev readline sqlite build-base postgresql-dev \
-    libc-dev linux-headers libxml2-dev libxslt-dev readline-dev gcc libc-dev \
-  && rm -rf /var/cache/apk/
+	libffi-dev readline sqlite build-base postgresql-dev \
+	libc-dev linux-headers libxml2-dev libxslt-dev readline-dev gcc libc-dev \
+	&& rm -rf /var/cache/apk/
 
 ########### End dependencies for Nokogiri
 
-RUN mkdir -p /home/jenkins
-RUN chown -R 1000:1000 /home/jenkins
+RUN mkdir -p /home/jenkins && chown -R jenkins:jenkins /home/jenkins
+RUN	mkdir /report && chown -R jenkins:jenkins /report   
 
 USER jenkins 
 
@@ -151,9 +151,20 @@ ENV PATH=$GEM_HOME/bin:$BUNDLE_PATH/gems/bin:$PATH
 
 RUN npm install -g yarn
 
+ENV owasp_version=5.1.0
+ENV owasp_dc_download=https://dl.bintray.com/jeremy-long/owasp
+
+RUN file="dependency-check-${owasp_version}-release.zip"                         		&& \
+	wget "$owasp_dc_download/$file"                                             && \
+	unzip ${file}                                                           	&& \
+	rm ${file}                                                             	 	&& \
+	mv dependency-check /home/jenkins/                                       	&& \                                    
+	chown -R jenkins:jenkins /home/jenkins/dependency-check                  
+
+RUN gem install bundle-audit  
+RUN gem cleanup
 
 COPY --chown=jenkins:jenkins include/LicenseFinder /home/jenkins/LicenseFinder
-COPY --chown=jenkins:jenkins include/dependency-scan /home/jenkins/dependency-scan
 
 WORKDIR /home/jenkins/LicenseFinder
 RUN gem install bundler:2.0.1
@@ -161,18 +172,19 @@ RUN git init && git add .
 RUN bundle install -j4 
 RUN rake install
 
+COPY --chown=jenkins:jenkins include/dependency-scan /home/jenkins/dependency-scan
+
 WORKDIR /home/jenkins/dependency-scan
 RUN yarn install && yarn build
 WORKDIR /home/jenkins
 
 USER root
 
-
 ARG VERSION=3.28
 COPY jenkins-agent-entrypoint /usr/local/bin/jenkins-agent-entrypoint
 RUN curl --create-dirs -fsSLo /usr/share/jenkins/slave.jar https://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/${VERSION}/remoting-${VERSION}.jar \
-  && chmod 755 /usr/share/jenkins \
-  && chmod 644 /usr/share/jenkins/slave.jar
+	&& chmod 755 /usr/share/jenkins \
+	&& chmod 644 /usr/share/jenkins/slave.jar
 
 ENTRYPOINT [ "jenkins-agent-entrypoint" ]
 
