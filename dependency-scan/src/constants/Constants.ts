@@ -14,6 +14,8 @@ import { Utilities } from "../utils/Utilities";
 
 export class Constants {
 
+    public static readonly LICENSE_FINDER_DIR: string = path.resolve(__dirname, '../../../', 'LicenseFinder');
+
     public static readonly BASE_WORK_DIR: string = path.join(".", "build");
 
     public static readonly BUILD_RESOURCES_DIR: string = path.join(Constants.BASE_WORK_DIR, "resources");

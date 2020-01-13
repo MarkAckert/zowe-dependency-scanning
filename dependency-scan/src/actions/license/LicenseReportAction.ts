@@ -128,16 +128,36 @@ export class LicenseReportAction implements IAction {
         const resolvedDir = path.join(Constants.CLONE_DIR, projectPath);
         const normalizedProjectName = projectPath.replace(/[\\\/]/g, "-");
         console.log("Running license_finder report on " + resolvedDir);
-        const reportProcess = spawn("license_finder", ["report", "--format", "markdown_table",
-            "--project-path", resolvedDir,
-            "--project-name", normalizedProjectName,
-            "--save", path.join(Constants.LICENSE_REPORTS_DIR, `${normalizedProjectName}.md`),
-            "--decisions-file=" + Constants.DEPENDENCY_DECISIONS_YAML], {
-                cwd: process.env.cwd,
-                env: process.env,
-                // Shell true required for aggregate paths with spaces between projects
-                shell: true
-            });
+        // const reportProcess = spawn("license_finder", ["report", "--format", "markdown_table",
+        //     "--project-path", resolvedDir,
+        //     "--project-name", normalizedProjectName,
+        //     "--save", path.join(Constants.LICENSE_REPORTS_DIR, `${normalizedProjectName}.md`),
+        //     "--decisions-file=" + Constants.DEPENDENCY_DECISIONS_YAML], {
+        const reportProcess = spawn("docker", [
+            "run",
+            "-v", `${process.cwd()}/${Constants.BASE_WORK_DIR}:/build`,
+            "-v", `${Constants.LICENSE_FINDER_DIR}:/LicenseFinder`,
+            "licensefinder/license_finder",
+            "/bin/bash",
+            "-c",
+            "'" + [
+                ". /root/.bash_profile",
+                "&&",
+                "/LicenseFinder/bin/license_finder",
+                "report",
+                "--format", "markdown_table",
+                "--project-path", `/${resolvedDir}`,
+                // FIXME: ERROR: "license_finder report" was called with arguments ["--project-name", "api-layer"]
+                "--project-name", normalizedProjectName,
+                "--save", path.join("/", Constants.LICENSE_REPORTS_DIR, `${normalizedProjectName}.md`),
+                `--decisions-file=/${Constants.DEPENDENCY_DECISIONS_YAML}`,
+            ].join(" ") + "'",
+        ], {
+            cwd: process.env.cwd,
+            env: process.env,
+            // Shell true required for aggregate paths with spaces between projects
+            shell: true
+        });
         const logPromise: Promise<any> = this.log.logOutputAsync(reportProcess, projectPath, "report");
         logPromise.then((result) => {
             cb(null, result);
