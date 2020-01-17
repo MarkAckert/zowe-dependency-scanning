@@ -135,23 +135,26 @@ export class LicenseReportAction implements IAction {
         //     "--decisions-file=" + Constants.DEPENDENCY_DECISIONS_YAML], {
         const reportProcess = spawn("docker", [
             "run",
+            "--rm",
             "-v", `${process.cwd()}/${Constants.BASE_WORK_DIR}:/build`,
             "-v", `${Constants.LICENSE_FINDER_DIR}:/LicenseFinder`,
             "licensefinder/license_finder",
             "/bin/bash",
             "-c",
             "'" + [
+            // [
                 ". /root/.bash_profile",
                 "&&",
                 "/LicenseFinder/bin/license_finder",
                 "report",
-                "--format", "markdown_table",
+                "--recursive",
+                "--format", "json",
                 "--project-path", `/${resolvedDir}`,
-                // FIXME: ERROR: "license_finder report" was called with arguments ["--project-name", "api-layer"]
-                "--project-name", normalizedProjectName,
-                "--save", path.join("/", Constants.LICENSE_REPORTS_DIR, `${normalizedProjectName}.md`),
+                "--save", path.join("/", Constants.LICENSE_REPORTS_DIR, `${normalizedProjectName}.json`),
                 `--decisions-file=/${Constants.DEPENDENCY_DECISIONS_YAML}`,
+                "--columns=name version authors licenses license_links approved summary description homepage install_path package_manager groups texts notice"
             ].join(" ") + "'",
+            // ].join(" "),
         ], {
             cwd: process.env.cwd,
             env: process.env,

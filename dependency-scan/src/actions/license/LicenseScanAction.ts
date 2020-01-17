@@ -79,12 +79,14 @@ export class LicenseScanAction implements IAction {
             //     "--aggregate-paths='" + allProjects.join("' '") + "'"], {
             const licenseProcess = spawn.sync("docker", [
                 "run",
+                "--rm",
                 "-v", `${process.cwd()}/${Constants.BASE_WORK_DIR}:/build`,
                 "-v", `${Constants.LICENSE_FINDER_DIR}:/LicenseFinder`,
                 "licensefinder/license_finder",
                 "/bin/bash",
                 "-c",
-                "'" + [
+                // "'" + [
+                [
                     ". /root/.bash_profile",
                     "&&",
                     "/LicenseFinder/bin/license_finder",
@@ -93,7 +95,8 @@ export class LicenseScanAction implements IAction {
                     "--quiet",
                     `--decisions-file=/${Constants.DEPENDENCY_DECISIONS_YAML}`,
                     "--aggregate-paths", "/" + allProjects.join(" /"),
-                ].join(" ") + "'",
+                // ].join(" ") + "'",
+                ].join(" "),
             ], {
                 cwd: process.env.cwd,
                 env: process.env,
@@ -115,12 +118,14 @@ export class LicenseScanAction implements IAction {
         //     "--decisions-file=" + Constants.DEPENDENCY_DECISIONS_YAML], {
         const licenseProcess = spawn("docker", [
             "run",
+            "--rm",
             "-v", `${process.cwd()}/${Constants.BASE_WORK_DIR}:/build`,
             "-v", `${Constants.LICENSE_FINDER_DIR}:/LicenseFinder`,
             "licensefinder/license_finder",
             "/bin/bash",
             "-c",
-            "'" + [
+            // "'" + [
+            [
                 ". /root/.bash_profile",
                 "&&",
                 "/LicenseFinder/bin/license_finder",
@@ -128,7 +133,8 @@ export class LicenseScanAction implements IAction {
                 "--project-path", `/${projectDir}`,
                 "--format", "json",
                 `--decisions-file=/${Constants.DEPENDENCY_DECISIONS_YAML}`,
-            ].join(" ") + "'",
+            // ].join(" ") + "'",
+            ].join(" "),
         ], {
             cwd: process.env.cwd,
             env: process.env,
