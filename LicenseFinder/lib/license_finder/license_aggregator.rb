@@ -54,6 +54,59 @@ module LicenseFinder
                               .map do |_, packages|
         MergedPackage.new(packages[0].dependency, packages.flat_map(&:aggregate_paths))
       end
+
+      zowe_extra_fixes
+    end
+
+    # license should be short_name defined in LicenseFinder/lib/license_finder/license/definitions.rb
+    ZOWE_FIXES = {
+      "org.sonatype.oss:oss-parent:7": {
+        homepage: "https://mvnrepository.com/artifact/org.sonatype.oss/oss-parent/7",
+        licenses: ["Apache2"]
+      },
+      "javax.servlet:servlet-api:2.5": {
+        homepage: "https://mvnrepository.com/artifact/javax.servlet/servlet-api/2.5",
+        licenses: ["GPLv2"]
+      },
+      "javax.xml.stream:stax-api:1.0-2": {
+        homepage: "https://mvnrepository.com/artifact/javax.xml.stream/stax-api/1.0-2",
+        licenses: ["GPLv2"]
+      }
+    }
+    
+    def zowe_extra_fixes
+      @packages.map do |package|
+        # ==========
+        # check some common failure
+        # 1. homepage doesn't start with http
+        begin
+          if !package.dependency.homepage.empty? && !package.dependency.homepage.start_with?("http://", "https://")
+            package.dependency.homepage.prepend("http://")
+          end
+        end
+
+        # ==========
+        # check pre-defined dependency fixes
+        package_key = "#{package.name}:#{package.version}".to_sym
+        if ZOWE_FIXES.has_key?(package_key)
+          package.dependency.logger.info "[zowe_extra_fixes] found", " #{package_key}", color: :green
+          # puts package.inspect
+          if ZOWE_FIXES[package_key].has_key?(:homepage)
+            package.dependency.logger.info "[zowe_extra_fixes] - update homepage to", "#{ZOWE_FIXES[package_key][:homepage]}", color: :green
+            package.dependency.homepage = ZOWE_FIXES[package_key][:homepage]
+          end
+          if ZOWE_FIXES[package_key].has_key?(:licenses)
+            package.dependency.logger.info "[zowe_extra_fixes] - update licenses to", "#{ZOWE_FIXES[package_key][:licenses]}", color: :green
+            package.dependency.licenses.clear()
+            ZOWE_FIXES[package_key][:licenses].each { |license_name|
+              package.dependency.licenses.add(License.find_by_name(license_name))
+            }
+          end
+          # puts package.inspect
+        end
+
+        package
+      end
     end
   end
 end

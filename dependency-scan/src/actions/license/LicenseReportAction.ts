@@ -145,14 +145,32 @@ export class LicenseReportAction implements IAction {
             // [
                 ". /root/.bash_profile",
                 "&&",
-                "/LicenseFinder/bin/license_finder",
+                "cd /LicenseFinder",
+                "&&",
+                "rm -f pkg/*",
+                "&&",
+                "bundle install --local",
+                "&&",
+                // bundle clean failed if don't run bundle install
+                // bundle clean is required to clean up license-finder gem cache
+                "bundle clean --force",
+                "&&",
+                "bundle install -j4",
+                "&&",
+                "rake install",
+                "&&",
+                "cd ~",
+                "&&",
+                "license_finder",
                 "report",
-                "--recursive",
-                "--format", "json",
+                // "--recursive",
+                "--format", "markdown_table",
                 "--project-path", `/${resolvedDir}`,
-                "--save", path.join("/", Constants.LICENSE_REPORTS_DIR, `${normalizedProjectName}.json`),
+                "--project-name", normalizedProjectName,
+                "--save", path.join("/", Constants.LICENSE_REPORTS_DIR, `${normalizedProjectName}.md`),
                 `--decisions-file=/${Constants.DEPENDENCY_DECISIONS_YAML}`,
-                "--columns=name version authors licenses license_links approved summary description homepage install_path package_manager groups texts notice"
+                "--gradle_include_groups",
+                // "--columns=name version authors licenses license_links approved summary description homepage install_path package_manager groups texts notice"
             ].join(" ") + "'",
             // ].join(" "),
         ], {
