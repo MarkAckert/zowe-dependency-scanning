@@ -140,8 +140,8 @@ export class LicenseScanAction implements IAction {
             "licensefinder/license_finder",
             "/bin/bash",
             "-c",
-            "'" + [
-            // [
+            // "'" + [
+            [
                 ". /root/.bash_profile",
                 "&&",
                 "cd /LicenseFinder",
@@ -165,8 +165,8 @@ export class LicenseScanAction implements IAction {
                 "--project-path", `/${projectDir}`,
                 "--format", "json",
                 `--decisions-file=/${Constants.DEPENDENCY_DECISIONS_YAML}`,
-            ].join(" ") + "'",
-            // ].join(" "),
+            // ].join(" ") + "'",
+            ].join(" "),
         ], {
             cwd: process.env.cwd,
             env: process.env,

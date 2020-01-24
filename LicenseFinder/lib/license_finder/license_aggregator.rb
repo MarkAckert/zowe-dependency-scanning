@@ -76,6 +76,9 @@ module LicenseFinder
         homepage: "https://mvnrepository.com/artifact/javax.xml.stream/stax-api/1.0-2",
         licenses: ["GPLv2"]
       },
+      "fsevents:1.2.9": {
+        licenses: ["MIT"]
+      },
       "fsevents:1.2.11": {
         licenses: ["MIT"]
       },
@@ -84,6 +87,9 @@ module LicenseFinder
       },
       "buffers:0.1.1": {
         licenses: ["MIT"]
+      },
+      "taffydb:2.6.2": {
+        licenses: ["BSD-2-Clause"]
       },
     }
     
