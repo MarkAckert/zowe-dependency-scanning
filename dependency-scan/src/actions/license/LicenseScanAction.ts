@@ -85,18 +85,34 @@ export class LicenseScanAction implements IAction {
                 "licensefinder/license_finder",
                 "/bin/bash",
                 "-c",
-                // "'" + [
-                [
+                "'" + [
+                // [
                     ". /root/.bash_profile",
                     "&&",
-                    "/LicenseFinder/bin/license_finder",
+                    "cd /LicenseFinder",
+                    "&&",
+                    "rm -f pkg/*",
+                    "&&",
+                    "bundle install --local",
+                    "&&",
+                    // bundle clean failed if don't run bundle install
+                    // bundle clean is required to clean up license-finder gem cache
+                    "bundle clean --force",
+                    "&&",
+                    "bundle install -j4",
+                    "&&",
+                    "rake install",
+                    "&&",
+                    "cd ~",
+                    "&&",
+                    "license_finder",
                     "action_items",
                     "--format", "json",
                     "--quiet",
                     `--decisions-file=/${Constants.DEPENDENCY_DECISIONS_YAML}`,
                     "--aggregate-paths", "/" + allProjects.join(" /"),
-                // ].join(" ") + "'",
-                ].join(" "),
+                ].join(" ") + "'",
+                // ].join(" "),
             ], {
                 cwd: process.env.cwd,
                 env: process.env,
@@ -124,17 +140,33 @@ export class LicenseScanAction implements IAction {
             "licensefinder/license_finder",
             "/bin/bash",
             "-c",
-            // "'" + [
-            [
+            "'" + [
+            // [
                 ". /root/.bash_profile",
                 "&&",
-                "/LicenseFinder/bin/license_finder",
+                "cd /LicenseFinder",
+                "&&",
+                "rm -f pkg/*",
+                "&&",
+                "bundle install --local",
+                "&&",
+                // bundle clean failed if don't run bundle install
+                // bundle clean is required to clean up license-finder gem cache
+                "bundle clean --force",
+                "&&",
+                "bundle install -j4",
+                "&&",
+                "rake install",
+                "&&",
+                "cd ~",
+                "&&",
+                "license_finder",
                 "report",
                 "--project-path", `/${projectDir}`,
                 "--format", "json",
                 `--decisions-file=/${Constants.DEPENDENCY_DECISIONS_YAML}`,
-            // ].join(" ") + "'",
-            ].join(" "),
+            ].join(" ") + "'",
+            // ].join(" "),
         ], {
             cwd: process.env.cwd,
             env: process.env,

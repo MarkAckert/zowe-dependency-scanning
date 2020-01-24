@@ -55,9 +55,13 @@ module LicenseFinder
         MergedPackage.new(packages[0].dependency, packages.flat_map(&:aggregate_paths))
       end
 
+      #####################################################################################
+      # FIXES ADDED BY JACK JIA
       zowe_extra_fixes
     end
 
+    #####################################################################################
+    # FIXES ADDED BY JACK JIA
     # license should be short_name defined in LicenseFinder/lib/license_finder/license/definitions.rb
     ZOWE_FIXES = {
       "org.sonatype.oss:oss-parent:7": {
@@ -71,7 +75,16 @@ module LicenseFinder
       "javax.xml.stream:stax-api:1.0-2": {
         homepage: "https://mvnrepository.com/artifact/javax.xml.stream/stax-api/1.0-2",
         licenses: ["GPLv2"]
-      }
+      },
+      "fsevents:1.2.11": {
+        licenses: ["MIT"]
+      },
+      "cycle:1.0.3": {
+        licenses: ["CC01"]
+      },
+      "buffers:0.1.1": {
+        licenses: ["MIT"]
+      },
     }
     
     def zowe_extra_fixes
