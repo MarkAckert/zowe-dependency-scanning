@@ -128,16 +128,57 @@ export class LicenseReportAction implements IAction {
         const resolvedDir = path.join(Constants.CLONE_DIR, projectPath);
         const normalizedProjectName = projectPath.replace(/[\\\/]/g, "-");
         console.log("Running license_finder report on " + resolvedDir);
-        const reportProcess = spawn("license_finder", ["report", "--format", "markdown_table",
-            "--project-path", resolvedDir,
-            "--project-name", normalizedProjectName,
-            "--save", path.join(Constants.LICENSE_REPORTS_DIR, `${normalizedProjectName}.md`),
-            "--decisions-file=" + Constants.DEPENDENCY_DECISIONS_YAML], {
-                cwd: process.env.cwd,
-                env: process.env,
-                // Shell true required for aggregate paths with spaces between projects
-                shell: true
-            });
+        // const reportProcess = spawn("license_finder", ["report", "--format", "markdown_table",
+        //     "--project-path", resolvedDir,
+        //     "--project-name", normalizedProjectName,
+        //     "--save", path.join(Constants.LICENSE_REPORTS_DIR, `${normalizedProjectName}.md`),
+        //     "--decisions-file=" + Constants.DEPENDENCY_DECISIONS_YAML], {
+        const reportProcess = spawn("docker", [
+            "run",
+            "--rm",
+            "-v", `${process.cwd()}/${Constants.BASE_WORK_DIR}:/build`,
+            "-v", `${Constants.LICENSE_FINDER_DIR}:/LicenseFinder`,
+            "licensefinder/license_finder",
+            "/bin/bash",
+            "-c",
+            "'" + [
+            // [
+                ". /root/.bash_profile",
+                "&&",
+                "cd /LicenseFinder",
+                "&&",
+                "rm -f pkg/*",
+                "&&",
+                "bundle install --local",
+                "&&",
+                // bundle clean failed if don't run bundle install
+                // bundle clean is required to clean up license-finder gem cache
+                "bundle clean --force",
+                "&&",
+                "bundle install -j4",
+                "&&",
+                "rake install",
+                "&&",
+                "cd ~",
+                "&&",
+                "license_finder",
+                "report",
+                // "--recursive",
+                "--format", "markdown_table",
+                "--project-path", `/${resolvedDir}`,
+                "--project-name", normalizedProjectName,
+                "--save", path.join("/", Constants.LICENSE_REPORTS_DIR, `${normalizedProjectName}.md`),
+                `--decisions-file=/${Constants.DEPENDENCY_DECISIONS_YAML}`,
+                "--gradle_include_groups",
+                // "--columns=name version authors licenses license_links approved summary description homepage install_path package_manager groups texts notice"
+            ].join(" ") + "'",
+            // ].join(" "),
+        ], {
+            cwd: process.env.cwd,
+            env: process.env,
+            // Shell true required for aggregate paths with spaces between projects
+            shell: true
+        });
         const logPromise: Promise<any> = this.log.logOutputAsync(reportProcess, projectPath, "report");
         logPromise.then((result) => {
             cb(null, result);

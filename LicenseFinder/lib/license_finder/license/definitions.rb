@@ -100,6 +100,21 @@ module LicenseFinder
         )
       end
 
+      #####################################################################################
+      # FIXES ADDED BY JACK JIA
+      def eclipse2
+        License.new(
+          short_name: 'EPL2',
+          pretty_name: 'Eclipse Public License 2.0',
+          other_names: [
+            'EPL-2.0',
+            'EPL 2.0',
+            'Eclipse Public License - v 2.0'
+          ],
+          url: 'https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.html'
+        )
+      end
+
       def gplv2
         License.new(
           short_name: 'GPLv2',

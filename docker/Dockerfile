@@ -7,9 +7,9 @@ RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositori
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
 RUN apk update && apk upgrade
 RUN apk add curl
-RUN apk add bash=5.0.0-r0
-RUN apk add nodejs=10.16.0-r0
-RUN apk add npm=10.16.0-r0
+RUN apk add bash=5.0.11-r1
+RUN apk add nodejs=12.14.0-r0
+RUN apk add npm=12.14.0-r0
 RUN apk add python zip unzip wget
 
 ############# From Ruby Dockerfile - the apk packages are old
