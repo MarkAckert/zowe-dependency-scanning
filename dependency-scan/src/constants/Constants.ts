@@ -30,8 +30,6 @@ export class Constants {
 
     public static readonly ZOWE_MANIFEST_PATH: string = path.join(Constants.BUILD_RESOURCES_DIR, "zowe-manifest.json");
 
-    public static readonly ZOWE_MANIFEST_SOURCE: string = path.join(".", "resources", "zowe-manifest-source.txt");
-
     public static readonly REPO_RULE_PATH: string = path.join(".", "resources", "repoRules.json");
 
     public static readonly DEPENDENCY_DECISIONS_YAML: string = path.join(Constants.BUILD_RESOURCES_DIR, "dependency_decisions.yml");
@@ -60,9 +58,11 @@ export class Constants {
     // Typical flow: get metadata, clone, perform installs, run scans, generate reports
     // set steps to false to skip them (partial runs)
     // If you skip step (n), you should skip all (n-1, n-2, etc.) steps.
-    
+
     // only change if re-running builds / modifying manifest or other metadata locally
     public static readonly DOWNLOAD_MANIFEST: boolean = Utilities.getEnv("ZOWE_DL_MANIFEST", true);
+
+    public static readonly ZOWE_MANIFEST_BRANCH: string = Utilities.getEnvStr("ZOWE_MANIFEST_BRANCH", "staging");
 
     public static readonly EXEC_CLONE: boolean = Utilities.getEnv("ZOWE_STEP_CLONE", true);
 

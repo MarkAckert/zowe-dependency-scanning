@@ -173,12 +173,12 @@ RUN bundle install -j4
 RUN rake install
 
 COPY --chown=jenkins:jenkins include/dependency-scan /home/jenkins/dependency-scan
-
 WORKDIR /home/jenkins/dependency-scan
 RUN yarn install && yarn build
 WORKDIR /home/jenkins
 
 USER root
+RUN curl -fL https://getcli.jfrog.io | sh && chmod 775 jfrog && mv jfrog /usr/local/bin
 
 ARG VERSION=3.28
 COPY jenkins-agent-entrypoint /usr/local/bin/jenkins-agent-entrypoint

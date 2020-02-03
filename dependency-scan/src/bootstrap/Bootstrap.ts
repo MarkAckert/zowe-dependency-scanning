@@ -43,12 +43,15 @@ export function bootstrap(container: Container) {
 
                     const reposFile = fs.createWriteStream(Constants.ZOWE_MANIFEST_PATH);
                     const dependencyDecisionsFile = fs.createWriteStream(Constants.DEPENDENCY_DECISIONS_YAML);
-                    https.get(fs.readFileSync(Constants.ZOWE_MANIFEST_SOURCE).toString().trim(), (response: any) => {
+
+                    const manifestRemoteLoc: string =
+                        `https://raw.githubusercontent.com/zowe/zowe-install-packaging/${Constants.ZOWE_MANIFEST_BRANCH}/manifest.json.template`;
+                    https.get(manifestRemoteLoc, (response: any) => {
                         response.pipe(reposFile);
                         reposFile.on("finish", () => {
                             const manifest = JSON.parse(fs.readFileSync(Constants.ZOWE_MANIFEST_PATH).toString());
-                            const depDecisionLocation = (fs.readFileSync(Constants.ZOWE_MANIFEST_SOURCE).toString().trim())
-                                .replace("manifest.json.template", "")
+                            const depDecisionLocation =
+                                `https://raw.githubusercontent.com/zowe/zowe-install-packaging/${Constants.ZOWE_MANIFEST_BRANCH}/`
                                 // Allow hard-coded access for the moment...externalize in Constants?
                                 // tslint:disable-next-line
                                 + manifest["dependencyDecisions"]["rel"];
@@ -90,4 +93,4 @@ export function bootstrap(container: Container) {
         }
     });
 
-};
+}
