@@ -14,6 +14,8 @@ import { Utilities } from "../utils/Utilities";
 
 export class Constants {
 
+    public static readonly LICENSE_FINDER_DIR: string = path.resolve(__dirname, '../../../', 'LicenseFinder');
+
     public static readonly BASE_WORK_DIR: string = path.join(".", "build");
 
     public static readonly BUILD_RESOURCES_DIR: string = path.join(Constants.BASE_WORK_DIR, "resources");
@@ -41,9 +43,9 @@ export class Constants {
 
     public static readonly PARALLEL_INSTALL_COUNT: number = 6;
 
-    public static readonly PARALLEL_SCAN_COUNT: number = 2;
+    public static readonly PARALLEL_SCAN_COUNT: number = 1;
 
-    public static readonly PARALLEL_REPORT_COUNT: number = 6;
+    public static readonly PARALLEL_REPORT_COUNT: number = 1;
 
     public static readonly CLEAN_REPO_DIR_ON_START: boolean = true;
 
